@@ -18,12 +18,34 @@ const App: React.FC = () => {
   const [residents, setResidents] = useState<Resident[]>([]);
   const [packages, setPackages] = useState<Package[]>([]);
   const [session, setSession] = useState<PorterSession | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showInstallModal, setShowInstallModal] = useState<'desktop' | 'mobile' | null>(null);
 
   useEffect(() => {
     setResidents(getResidents());
     setPackages(getPackages());
     setSession(getSession());
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      console.log('PWA: Prompt de instalação pronto.');
+    });
   }, []);
+
+  const handleInstallAction = async (type: 'desktop' | 'mobile') => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        setDeferredPrompt(null);
+        setShowInstallModal(null);
+      }
+    } else {
+      // Se não houver prompt automático (comum em abertura de arquivo local), mostra o guia manual
+      setShowInstallModal(type);
+    }
+  };
 
   const handleStartSession = (newSession: PorterSession) => {
     setSession(newSession);
@@ -109,13 +131,15 @@ const App: React.FC = () => {
         onLogout={handleLogout}
         packages={packages}
         residents={residents}
+        onInstall={handleInstallAction}
+        showInstallBtn={!!deferredPrompt}
       />
       
       <main className="flex-1 md:ml-64 p-4 md:p-12 overflow-y-auto">
         <div className="max-w-6xl mx-auto">
-          {/* Action Bar Mobile Responsive */}
           <div className="mb-6 flex flex-col sm:flex-row justify-end items-center gap-3">
-             <div className="text-xs text-slate-400 font-medium">
+             <div className="text-xs text-slate-400 font-medium bg-white px-3 py-1 rounded-full shadow-sm border border-slate-100">
+               <i className="fas fa-database mr-2 text-indigo-400"></i>
                {packages.length} registros no sistema
              </div>
             <label className="w-full sm:w-auto flex items-center justify-center gap-2 cursor-pointer bg-white px-5 py-2.5 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all text-sm font-bold shadow-sm">
@@ -149,6 +173,75 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
+
+      {/* MODAL DE INSTALAÇÃO MANUAL */}
+      {showInstallModal && (
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-[200] p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="p-6 bg-indigo-600 text-white flex justify-between items-center">
+               <h3 className="text-xl font-bold flex items-center gap-3">
+                 <i className={`fas ${showInstallModal === 'desktop' ? 'fa-desktop' : 'fa-mobile-alt'}`}></i>
+                 Instalar Portaria Smart
+               </h3>
+               <button onClick={() => setShowInstallModal(null)} className="bg-white/20 w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/30 transition-all">
+                 <i className="fas fa-times"></i>
+               </button>
+            </div>
+            <div className="p-8 space-y-6">
+               <p className="text-slate-600 leading-relaxed">
+                 Como o navegador bloqueia a instalação automática em pastas locais, siga este passo a passo para ter o ícone no seu {showInstallModal === 'desktop' ? 'Computador' : 'Celular'}:
+               </p>
+
+               {showInstallModal === 'mobile' ? (
+                 <div className="space-y-4">
+                    <div className="flex gap-4 items-start">
+                       <div className="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-bold">1</div>
+                       <p className="text-sm text-slate-700">Abra este app no <b>Google Chrome</b> do seu celular.</p>
+                    </div>
+                    <div className="flex gap-4 items-start">
+                       <div className="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-bold">2</div>
+                       <p className="text-sm text-slate-700">Toque nos <b>três pontinhos (⋮)</b> no canto superior direito.</p>
+                    </div>
+                    <div className="flex gap-4 items-start">
+                       <div className="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-bold">3</div>
+                       <p className="text-sm text-slate-700">Selecione <b>"Instalar Aplicativo"</b> ou "Adicionar à tela de início".</p>
+                    </div>
+                 </div>
+               ) : (
+                 <div className="space-y-4">
+                    <div className="flex gap-4 items-start">
+                       <div className="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-bold">1</div>
+                       <p className="text-sm text-slate-700">Na barra de endereços do <b>Edge ou Chrome</b>, procure um ícone pequeno de "Monitor com uma seta" no final da barra.</p>
+                    </div>
+                    <div className="flex gap-4 items-start">
+                       <div className="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-bold">2</div>
+                       <p className="text-sm text-slate-700">Clique nele e confirme em <b>"Instalar"</b>.</p>
+                    </div>
+                    <div className="flex gap-4 items-start">
+                       <div className="bg-indigo-100 text-indigo-600 w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-bold">3</div>
+                       <p className="text-sm text-slate-700">O app abrirá em tela cheia e criará um atalho na sua área de trabalho.</p>
+                    </div>
+                 </div>
+               )}
+
+               <div className="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                  <p className="text-[11px] text-amber-800 flex items-center gap-2 font-bold uppercase mb-1">
+                    <i className="fas fa-lightbulb"></i>
+                    Dica Profissional
+                  </p>
+                  <p className="text-[11px] text-amber-700">Para a instalação ser 100% automática, hospede esta pasta gratuitamente no site <b>Netlify.com</b>. É só arrastar a pasta lá!</p>
+               </div>
+
+               <button 
+                 onClick={() => setShowInstallModal(null)}
+                 className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-all"
+               >
+                 Entendi, vou fazer isso
+               </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

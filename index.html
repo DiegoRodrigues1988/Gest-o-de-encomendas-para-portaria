@@ -3,7 +3,11 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
     <title>Portaria Inteligente</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -12,10 +16,23 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
+            overscroll-behavior-y: contain;
         }
-        /* Garantir que o texto do input seja sempre visível */
         input, select, textarea {
-            color: #0f172a !important; /* slate-900 */
+            color: #0f172a !important;
+            font-size: 16px !important;
+        }
+        #fallback-message {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 9999;
+            padding: 2rem;
+            text-align: center;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
     </style>
 <script type="importmap">
@@ -33,6 +50,35 @@
 </script>
 </head>
 <body>
+    <div id="fallback-message">
+        <i class="fas fa-exclamation-triangle text-amber-500 text-5xl mb-4"></i>
+        <h1 class="text-2xl font-bold text-slate-800">Erro de Carregamento</h1>
+        <p class="text-slate-600 mt-2 max-w-md">Para o app funcionar, você não pode abrir o arquivo "index.html" direto da pasta. Você precisa usar um <b>servidor local</b> ou hospedar na internet.</p>
+        <div class="mt-6 p-4 bg-slate-50 rounded-xl text-left text-sm border border-slate-200">
+            <p className="font-bold">Como resolver:</p>
+            <ol class="list-decimal ml-4 mt-2 space-y-1">
+                <li>Instale a extensão <b>"Live Server"</b> no VS Code.</li>
+                <li>Ou arraste esta pasta para o <b>Netlify Drop</b>.</li>
+            </ol>
+        </div>
+    </div>
+
     <div id="root"></div>
+
+    <script>
+        // Check if running via file protocol
+        if (window.location.protocol === 'file:') {
+            document.getElementById('fallback-message').style.display = 'flex';
+        }
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('SW Registered', reg))
+                    .catch(err => console.log('SW Error', err));
+            });
+        }
+    </script>
 </body>
 </html>

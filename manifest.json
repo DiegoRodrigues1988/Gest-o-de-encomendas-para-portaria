@@ -1,0 +1,26 @@
+
+{
+  "name": "Portaria Inteligente - Gestão de Encomendas",
+  "short_name": "PortariaSmart",
+  "description": "Plataforma completa para gestão de portaria, encomendas e moradores.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3514/3514491.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3514/3514491.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
