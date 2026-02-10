@@ -26,13 +26,22 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: white;
+            background: #4f46e5;
             z-index: 9999;
             padding: 2rem;
             text-align: center;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            color: white;
+        }
+        .pulse {
+            animation: pulse-animation 2s infinite;
+        }
+        @keyframes pulse-animation {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
         }
     </style>
 <script type="importmap">
@@ -51,32 +60,33 @@
 </head>
 <body>
     <div id="fallback-message">
-        <i class="fas fa-exclamation-triangle text-amber-500 text-5xl mb-4"></i>
-        <h1 class="text-2xl font-bold text-slate-800">Erro de Carregamento</h1>
-        <p class="text-slate-600 mt-2 max-w-md">Para o app funcionar, você não pode abrir o arquivo "index.html" direto da pasta. Você precisa usar um <b>servidor local</b> ou hospedar na internet.</p>
-        <div class="mt-6 p-4 bg-slate-50 rounded-xl text-left text-sm border border-slate-200">
-            <p className="font-bold">Como resolver:</p>
-            <ol class="list-decimal ml-4 mt-2 space-y-1">
-                <li>Instale a extensão <b>"Live Server"</b> no VS Code.</li>
-                <li>Ou arraste esta pasta para o <b>Netlify Drop</b>.</li>
-            </ol>
+        <div class="bg-white p-8 rounded-3xl shadow-2xl text-slate-800 max-w-sm">
+            <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-magic text-4xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold">Quase lá!</h1>
+            <p class="text-slate-600 mt-4 leading-relaxed">
+                Para o sistema funcionar e você poder <b>baixar o ícone</b>, você precisa abrir este arquivo através de um link da internet ou servidor local.
+            </p>
+            <div class="mt-8 space-y-3">
+                <div class="p-3 bg-slate-50 rounded-xl text-left border border-slate-200">
+                    <p class="text-xs font-bold text-indigo-600 uppercase mb-1">Como resolver agora:</p>
+                    <p class="text-xs text-slate-500">Arraste esta pasta para o site <b>netlify.com</b> e abra o link que ele te der.</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="root"></div>
 
     <script>
-        // Check if running via file protocol
         if (window.location.protocol === 'file:') {
             document.getElementById('fallback-message').style.display = 'flex';
         }
 
-        // Register Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW Registered', reg))
-                    .catch(err => console.log('SW Error', err));
+                navigator.serviceWorker.register('./sw.js').catch(console.error);
             });
         }
     </script>
