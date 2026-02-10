@@ -1,0 +1,7 @@
+{
+  "name": "Copy of Portaria Inteligente - Gestor de Encomendas",
+  "description": "Uma plataforma moderna para porteiros gerenciarem a entrada e saída de encomendas, com integração inteligente para notificações via WhatsApp.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
